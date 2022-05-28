@@ -1,7 +1,9 @@
 <template>
   <div class="wrapper_fav">
-      <div class="empty_wrapper" v-if="favorites.length==0"> <p> Нет избранного</p></div>
-    <div class="photo_wrapper" v-if="favorites.length>0">
+    <div class="empty_wrapper" v-if="favorites.length == 0">
+      <p>Нет избранного</p>
+    </div>
+    <div class="photo_wrapper" v-if="favorites.length > 0">
       <div class="photo_row">
         <div
           class="photo_thumb"
@@ -40,61 +42,42 @@ export default {
   name: "FavoritesComponent",
   props: {
     favorites: {
+      //избранное
       type: Array,
       required: false,
     },
   },
   data() {
-    return {
-        showedPhoto: null
-    };
+    return {};
   },
   methods: {
-
     removeFromFavorites(id) {
-      const updatedfavorites=this.favorites.filter(photo=>photo!==id)
-        console.log(updatedfavorites);
-      this.$emit("favorites",{favorites:updatedfavorites} )
-
+      //Удаление из избранного
+      const updatedfavorites = this.favorites.filter((photo) => photo !== id);
+      this.$emit("favorites", { favorites: updatedfavorites });
     },
-
-  },
-  watch:{
-      favorites:{
-          handler(val){
-              console.log('gotcha',val)
-               this.$forceUpdate()
-          } ,
-
-      deep: true,
-      immediate: true,
-      }
-  },
-  mounted() {
-    console.log('fav',this.favorites);
   },
 };
 </script>
 <style scoped>
 .wrapper_fav {
   width: 100%;
-  /* height:90%; */
+  height: 90%;
   display: flex;
   top: 5vh;
   justify-content: center;
   align-items: start;
   overflow-y: auto;
 }
-.empty_wrapper{
-    display: flex;
-    justify-content:center;
-    align-items:center;
-    font-size:2rem;
+.empty_wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
 }
 .photo_wrapper {
-  width: 600px;
+  width: 500px;
   display: flex;
-  /* justify-content: center; */
   align-items: start;
   flex-direction: column;
   flex-wrap: wrap;
@@ -116,7 +99,7 @@ export default {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  width: 160px;
+  width: 150px;
 }
 .image_star {
   position: absolute;

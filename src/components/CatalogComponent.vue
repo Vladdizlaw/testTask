@@ -7,19 +7,23 @@
         :key="index"
       >
         <div class="user_title">
-          <div
-            :ref="user.id"
-            class="icon_add"
-            @click="
-              openAlbum = !openAlbum;
-              showAlbum(user.id);
-            "
-          ></div>
+          <div class="icon_add" @click="showAlbum(user.id)">
+            <img
+              v-if="!openAlbums || user.id !== openedUser"
+              src="../assets/closed_circle.svg"
+              alt=""
+            />
+            <img
+              v-if="openAlbums && user.id == openedUser"
+              src="../assets/opened_circle.svg"
+              alt=""
+            />
+          </div>
           <p>{{ user.name }}</p>
         </div>
         <div
           class="album_wrapper"
-          v-if="albums && openAlbum && user.id == albums[0].userId"
+          v-if="albums && openAlbums && user.id == albums[0].userId"
         >
           <div
             class="catalog-users_user_album"
@@ -27,19 +31,23 @@
             :key="index"
           >
             <div class="user_title">
-              <div
-                :ref="album.id"
-                class="icon_add"
-                @click="
-                  openPhoto = !openPhoto;
-                  showPhoto(album.id);
-                "
-              ></div>
+              <div class="icon_add" @click="showPhoto(album.id)">
+                <img
+                  v-if="!openPhotos || (openAlbums && album.id !== openedAlbum)"
+                  src="../assets/closed_circle.svg"
+                  alt=""
+                />
+                <img
+                  v-if="openPhotos && openAlbums && album.id == openedAlbum"
+                  src="../assets/opened_circle.svg"
+                  alt=""
+                />
+              </div>
               <p>{{ album.title }}</p>
             </div>
             <div
               class="photo_wrapper"
-              v-if="photos && openPhoto && album.id == photos[0].albumId"
+              v-if="photos && openPhotos && album.id == photos[0].albumId"
             >
               <div class="photo_row">
                 <div
@@ -68,7 +76,7 @@
                   </div>
                 </div>
               </div>
-              <show-modal ref="modal" :url="url"/>
+              <show-modal ref="modal" :url="url" />
             </div>
           </div>
         </div>
@@ -83,40 +91,44 @@ export default {
   name: "CatalogComponent",
   props: {
     users: {
+      //пользователи
       type: Array,
       required: false,
     },
-   favorites: {
+    favorites: {
+      //избраное
       type: Array,
       required: false,
     },
   },
   data() {
     return {
-      albums: null,
-      openAlbum: false,
-      openedUser: null,
-      photos: null,
-      openPhoto: false,
-      // favorites: [],
-      url: null,
+      albums: null, //Массив загружаемых альбомов
+      openAlbums: false, //флаг показывающий открыт ли список альбомов
+      openedAlbum: null, //текущий открытый альбом
+      openedUser: null, //текущий открытый пользователь
+      photos: null, //Массив загружаемых фото
+      openPhotos: false, //флаг показывающий открыт ли список фотографий
+      url: null, //урл передаваемый в модалку
     };
   },
-  computed:{
-    favoritesId(){
-      const newFavorites= this.favorites.map(el=>{
-        return el.id
-      })
-      console.log(newFavorites)
-      return newFavorites
-    }
+  computed: {
+    favoritesId() {
+      //делает массив id фотографий  из избраного(props)
+      const newFavorites = this.favorites.map((el) => {
+        return el.id;
+      });
+      return newFavorites;
+    },
   },
   methods: {
     openModal(url) {
+      //открывает модалку
       this.url = url;
       this.$refs.modal[0].openModal();
     },
     async getAlbumsData(id) {
+      //получает альбомы и записывает в albums
       try {
         let data = await fetch(
           `http://jsonplaceholder.typicode.com/albums?userId=${id}`,
@@ -131,6 +143,7 @@ export default {
       }
     },
     async getPhotoData(id) {
+      //получает фото записывает в photos
       try {
         let data = await fetch(
           `http://jsonplaceholder.typicode.com/photos?albumId=${id}`,
@@ -140,56 +153,43 @@ export default {
         );
         data = await data.json();
         this.photos = data;
-        console.log(this.photos);
       } catch (e) {
         console.log(e);
       }
     },
     addToFavorites(photo) {
+      //добавляет\удаляет из избранного
       if (!this.favoritesId.includes(photo.id)) {
-        let newfavorites=this.favorites
-        newfavorites.push(photo)
-          console.log('not inc;uded')
-        this.$emit("favorites",{favorites:newfavorites})
+        let newfavorites = this.favorites;
+        newfavorites.push(photo);
+        this.$emit("favorites", { favorites: newfavorites });
       } else {
-       
-       let newfavorites = this.favorites.filter((el) => el.id !== photo.id);
-       console.log('inc;uded')
-       this.$emit("favorites",{favorites:newfavorites})
-      }
-      
-      console.log(this.favorites);
-    },
-    changeIconColor(id) {
-      if (this.openAlbum) {
-        if (this.openedUser) {
-          this.$refs[this.openedUser][0].style.backgroundColor = "blue";
-          this.openedUser = null;
-        }
-        this.$refs[id][0].style.backgroundColor = "yellow";
-      } else if (!this.openAlbum) {
-        this.$refs[id][0].style.backgroundColor = "blue";
-
-        if (this.openedUser) {
-          this.$refs[this.openedUser][0].style.backgroundColor = "blue";
-          console.log("yellow", this.openedUser);
-          this.openedUser = null;
-        }
+        let newfavorites = this.favorites.filter((el) => el.id !== photo.id);
+        this.$emit("favorites", { favorites: newfavorites });
       }
     },
     async showAlbum(id) {
+      //закрытие открытие и смена иконок альбомов
       await this.getAlbumsData(id);
-      this.changeIconColor(id);
-      this.openedUser = id;
+      if (this.openedUser == id) {
+        this.openAlbums = false;
+        this.openedUser = null;
+      } else {
+        this.openAlbums = true;
+        this.openedUser = id;
+      }
     },
     async showPhoto(id) {
+      //закрытие открытие и смена иконок фото
       await this.getPhotoData(id);
-      this.changeIconColor(id);
-      this.openedAlbum = id;
+      if (this.openedAlbum == id) {
+        this.openPhotos = false;
+        this.openedAlbum = null;
+      } else {
+        this.openPhotos = true;
+        this.openedAlbum = id;
+      }
     },
-  },
-  mounted() {
-    console.log('prps',this.$props)
   },
 };
 </script>
@@ -209,8 +209,6 @@ export default {
   align-items: start;
   flex-direction: column;
   overflow-y: auto;
-
-  /* gap:1rem; */
 }
 .catalog-users_user {
   display: flex;
@@ -229,31 +227,14 @@ export default {
   gap: 0.5rem;
 }
 .icon_add {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+
   position: relative;
-  background-color: blue;
 }
-.icon_add::before {
-  content: "";
-  width: 0;
-  height: 40%;
-  top: 50%;
-  border: 2px solid white;
-  left: 40%;
-  position: absolute;
-  transform: translateY(-50%);
-}
-.icon_add::after {
-  content: "";
-  width: 40%;
-  height: 0;
-  top: 40%;
-  border: 2px solid white;
-  left: 50%;
-  position: absolute;
-  transform: translateX(-50%);
+.icon_add > img {
+  width: 1rem;
+  height: 1rem;
 }
 .album_wrapper {
   margin-left: 2rem;
@@ -263,6 +244,7 @@ export default {
   flex-direction: column;
 }
 .photo_wrapper {
+  margin-left: 2rem;
   width: 500px;
   display: flex;
   justify-content: space-around;
