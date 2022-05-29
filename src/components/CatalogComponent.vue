@@ -6,8 +6,8 @@
         v-for="(user, index) in users"
         :key="index"
       >
-        <div class="user_title">
-          <div class="icon_add" @click="showAlbum(user.id)">
+        <div class="user_title" @click="showAlbum(user.id)">
+          <div class="icon_add">
             <img
               v-if="!openAlbums || user.id !== openedUser"
               src="../assets/closed_circle.svg"
@@ -30,8 +30,8 @@
             v-for="(album, index) in albums"
             :key="index"
           >
-            <div class="user_title">
-              <div class="icon_add" @click="showPhoto(album.id)">
+            <div class="user_title" @click="showPhoto(album.id)">
+              <div class="icon_add">
                 <img
                   v-if="!openPhotos || (openAlbums && album.id !== openedAlbum)"
                   src="../assets/closed_circle.svg"
@@ -56,8 +56,7 @@
                   :key="index"
                 >
                   <img
-                    width="150"
-                    height="150"
+                    class="photo_thumb_image"
                     @click="openModal(photo.url)"
                     :src="photo.thumbnailUrl"
                     :title="photo.title"
@@ -115,10 +114,10 @@ export default {
   computed: {
     favoritesId() {
       //делает массив id фотографий  из избраного(props)
-      const newFavorites = this.favorites.map((el) => {
+
+      return this.favorites.map((el) => {
         return el.id;
       });
-      return newFavorites;
     },
   },
   methods: {
@@ -160,7 +159,7 @@ export default {
     addToFavorites(photo) {
       //добавляет\удаляет из избранного
       if (!this.favoritesId.includes(photo.id)) {
-        let newfavorites = this.favorites;
+        let newfavorites = [...this.favorites];
         newfavorites.push(photo);
         this.$emit("favorites", { favorites: newfavorites });
       } else {
@@ -201,7 +200,7 @@ export default {
 }
 .catalog-users {
   margin-left: 1rem;
-
+  padding: 1rem 1rem 1rem 1rem;
   height: 100%;
   width: 100%;
   display: flex;
@@ -237,21 +236,24 @@ export default {
   height: 1rem;
 }
 .album_wrapper {
-  margin-left: 2rem;
+  padding-left: 2rem;
+
   display: flex;
   justify-content: space-around;
   align-items: start;
   flex-direction: column;
 }
 .photo_wrapper {
-  margin-left: 2rem;
-  width: 500px;
+  padding-left: 2rem;
+  width: 100%;
   display: flex;
   justify-content: space-around;
-  align-items: start;
+  align-items: center;
   flex-direction: column;
   flex-wrap: wrap;
   gap: 1rem;
+}
+@media screen and(orientati) {
 }
 .photo_row {
   width: 100%;
@@ -267,6 +269,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.photo_thumb_image {
+  width: clamp(9vw, 150px, 4rem);
 }
 .image_star {
   position: absolute;

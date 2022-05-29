@@ -62,14 +62,15 @@ export default {
 <style scoped>
 .wrapper_fav {
   width: 100%;
-  height: 90%;
+  max-height: 90%;
   display: flex;
-  top: 5vh;
   justify-content: center;
   align-items: start;
   overflow-y: auto;
+  padding-top: 2rem;
 }
 .empty_wrapper {
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
